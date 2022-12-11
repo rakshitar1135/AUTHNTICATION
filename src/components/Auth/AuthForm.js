@@ -1,4 +1,5 @@
-import { useState, useRef } from "react";
+import { useState, useRef,useContext } from "react";
+import AuthContext from "../../Store/Auth-context";
 
 import classes from "./AuthForm.module.css";
 
@@ -6,9 +7,9 @@ const AuthForm = () => {
   const emailInputRef = useRef();
   const passwordInputRef = useRef();
 
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLoggedIn, setIsLogin] = useState(true);
   const[isloading,SetIsLoading]=useState(false)
-
+   const AuthCtx=useContext(AuthContext)
   const switchAuthModeHandler = () => {
     setIsLogin((prevState) => !prevState);
   };
@@ -22,7 +23,7 @@ const AuthForm = () => {
     SetIsLoading(true)
     let url;
 
-    if (isLogin) {
+    if (isLoggedIn) {
       url='https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyD9CllfV0tx_4qSf2nSzKyn4Q0BlqazDMM '
     } else {
       url='https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyD9CllfV0tx_4qSf2nSzKyn4Q0BlqazDMM '
@@ -54,7 +55,7 @@ const AuthForm = () => {
         }
       })
       .then((data) => {
-        console.log(data);
+        AuthCtx.login(data.idToken)
       })
       .catch((err) => {
         alert(err.message);
@@ -64,7 +65,7 @@ const AuthForm = () => {
 
   return (
     <section className={classes.auth}>
-      <h1>{isLogin ? "Login" : "Sign Up"}</h1>
+      <h1>{isLoggedIn ? "Login" : "Sign Up"}</h1>
       <form onSubmit={submitHandler}>
         <div className={classes.control}>
           <label htmlFor="email">Your Email</label>
@@ -80,14 +81,14 @@ const AuthForm = () => {
           />
         </div>
         <div className={classes.actions}>
-        {!isloading && <button>{isLogin ? 'Login' : 'Create Account'}</button>}
+        {!isloading && <button>{isLoggedIn ? 'Login' : 'Create Account'}</button>}
           {isloading && <p>Sending request...</p>}
           <button
             type="button"
             className={classes.toggle}
             onClick={switchAuthModeHandler}
           >
-            {isLogin ? "Create new account" : "Login with existing account"}
+            {isLoggedIn ? "Create new account" : "Login with existing account"}
           </button>
         </div>
       </form>
